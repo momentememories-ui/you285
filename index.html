@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Happy Anniversary</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,300;0,400;0,600;1,400&family=Mitr:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      font-family: 'Kanit', sans-serif;
+    }
+
+    html, body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background-color: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      touch-action: none;
+    }
+
+    .app-viewport {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      background-color: #ffffff;
+      overflow: hidden;
+    }
+
+    .card-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .layer-3-message {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: fill;
+      z-index: 1;
+    }
+
+    #burnCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 2;
+    }
+
+    .layer-1-box {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: fill;
+      z-index: 4;
+      pointer-events: none;
+    }
+
+    #fxCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 100;
+      pointer-events: none;
+    }
+
+    .striker-fixed-container {
+      position: absolute;
+      bottom: 30px;
+      left: 20px;
+      z-index: 10;
+      transition: opacity 0.5s ease;
+    }
+
+    .matchbox-striker {
+      width: 210px;
+      height: 55px;
+      background: #3e2723;
+      border: 2px solid #271714;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #d7ccc8;
+      font-size: 13px;
+      font-weight: 400;
+      background-image: repeating-linear-gradient(45deg, #2c1b18 0, #2c1b18 5px, #3e2723 5px, #3e2723 10px);
+    }
+
+    .matchstick-item {
+      width: 450px;
+      height: 120px;
+      cursor: grab;
+      position: absolute;
+      bottom: 10px;
+      right: -20px;
+      z-index: 20;
+      touch-action: none;
+    }
+
+    .matchstick-item:active { cursor: grabbing; }
+    .matchstick-item img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+
+    /* ปรับตำแหน่งปุ่มหัวใจให้เลื่อนลงมาด้านล่างเพิ่มขึ้นจากเดิม */
+    .bouncing-heart-trigger {
+      position: absolute;
+      bottom: 25px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 75px;
+      cursor: pointer;
+      z-index: 150;
+      display: none;
+      animation: heartBounce 1.2s infinite ease-in-out;
+      background: transparent !important;
+      border: none !important;
+      outline: none !important;
+      box-shadow: none !important;
+      -webkit-tap-highlight-color: transparent;
+      filter: drop-shadow(0 4px 12px rgba(255, 150, 180, 0.6));
+    }
+
+    @keyframes heartBounce {
+      0%, 100% { transform: translateX(-50%) scale(1); }
+      50% { transform: translateX(-50%) scale(1.25) rotate(-5deg); }
+    }
+
+    .big-heart-modal {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #ffffff;
+      z-index: 200;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .big-heart-container {
+      position: relative;
+      width: 230px;
+      height: 210px;
+      cursor: pointer;
+    }
+
+    .big-heart-shape {
+      width: 100%;
+      height: 100%;
+      background-color: #fff0f5;
+      clip-path: path('M115,190 C115,190 20,125 20,65 C20,32 42,15 72,15 C91,15 105,25 115,38 C125,25 139,15 158,15 C188,15 210,32 210,65 C210,125 115,190 115,190 Z');
+      position: relative;
+      border: 3px solid #ffb6c1;
+      box-shadow: 0 10px 25px rgba(255, 182, 193, 0.5);
+    }
+
+    .heart-water-fill {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 0%;
+      background: linear-gradient(0deg, #ff8da1, #ffb6c1, #ffc0cb);
+      transition: height 0.12s ease-out;
+      box-shadow: 0 -4px 12px rgba(255, 182, 193, 0.6);
+    }
+
+    .fill-instruction {
+      color: #d87093;
+      font-size: 15px;
+      margin-top: 25px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      animation: pulseText 1.5s infinite;
+    }
+
+    @keyframes pulseText {
+      0%, 100% { opacity: 0.8; }
+      50% { opacity: 1; }
+    }
+
+    /* เปลี่ยนโทนสีพื้นหลังหน้าแสดงรูปเป็น ชมพู-ม่วง พาสเทลหวานๆ */
+    .polaroid-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: linear-gradient(135deg, rgba(255, 192, 203, 0.85), rgba(216, 191, 216, 0.85)), url('พื้นหลัง.jpg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-blend-mode: overlay;
+      z-index: 300;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      animation: fadeIn 0.4s ease;
+      overflow: hidden;
+    }
+
+    .polaroid-container { position: relative; width: 100%; height: 100%; }
+
+    .polaroid {
+      position: absolute;
+      width: 115px;
+      background: #ffffff;
+      padding: 3px 3px 12px 3px;
+      box-shadow: 0 4px 12px rgba(216, 191, 216, 0.3), 0 2px 4px rgba(255, 182, 193, 0.2);
+      border-radius: 2px;
+      cursor: pointer;
+      opacity: 0;
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                  box-shadow 0.3s ease, 
+                  width 0.4s ease, 
+                  padding 0.4s ease,
+                  top 0.4s ease,
+                  left 0.4s ease;
+      will-change: transform, opacity, top, left;
+    }
+
+    .polaroid img {
+      width: 100%;
+      height: auto;
+      object-fit: contain;
+      border-radius: 1px;
+      display: block;
+      background-color: #fcf8fa;
+      transition: max-height 0.4s ease;
+    }
+
+    .polaroid .caption {
+      opacity: 0;
+      max-height: 0;
+      overflow: hidden;
+      text-align: center;
+      font-size: 11px;
+      color: #333333;
+      margin-top: 0;
+      font-weight: 500;
+      line-height: 1.3;
+      transition: opacity 0.3s ease 0.1s, margin-top 0.3s ease, max-height 0.3s ease;
+    }
+
+    .polaroid .close-card-btn {
+      opacity: 0;
+      pointer-events: none;
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      width: 26px;
+      height: 26px;
+      background: #ffb6c1;
+      color: #7b3f00;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 26px;
+      font-size: 13px;
+      font-weight: bold;
+      box-shadow: 0 2px 8px rgba(255, 182, 193, 0.6);
+      cursor: pointer;
+      z-index: 10;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      transform: scale(0.6);
+    }
+
+    @keyframes burstAndSpread {
+      0% {
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0) rotate(0deg);
+        opacity: 0;
+      }
+      60% {
+        opacity: 1;
+        transform: translate(0, 0) scale(1.1) rotate(var(--target-rotate));
+      }
+      100% {
+        opacity: 1;
+        transform: translate(0, 0) scale(1) rotate(var(--target-rotate));
+      }
+    }
+
+    @keyframes shakeAndFloat {
+      0%, 100% {
+        transform: translateY(0px) rotate(var(--target-rotate));
+      }
+      20% {
+        transform: translateY(-8px) rotate(calc(var(--target-rotate) - 6deg)) scale(1.03);
+      }
+      40% {
+        transform: translateY(4px) rotate(calc(var(--target-rotate) + 6deg)) scale(0.98);
+      }
+      60% {
+        transform: translateY(-6px) rotate(calc(var(--target-rotate) - 4deg)) scale(1.02);
+      }
+      80% {
+        transform: translateY(2px) rotate(calc(var(--target-rotate) + 3deg)) scale(1);
+      }
+    }
+
+    .polaroid.animate-burst {
+      animation: burstAndSpread 0.75s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+
+    .polaroid.idle-bounce {
+      animation: shakeAndFloat var(--anim-duration, 2s) ease-in-out infinite;
+      animation-delay: var(--anim-delay, 0s);
+    }
+
+    .polaroid.active {
+      position: fixed !important;
+      top: 50% !important;
+      left: 50% !important;
+      transform: translate(-50%, -50%) scale(1) rotate(0deg) !important;
+      z-index: 999 !important;
+      width: fit-content !important;
+      max-width: 92vw !important;
+      height: auto !important;
+      padding: 8px 8px 18px 8px !important;
+      box-shadow: 0 25px 50px rgba(216, 191, 216, 0.4) !important;
+      border-radius: 6px;
+      animation: none !important;
+      opacity: 1 !important;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .polaroid.active img {
+      width: auto !important;
+      max-width: 100% !important;
+      max-height: 75vh !important;
+      object-fit: contain !important;
+      border-radius: 3px;
+      background-color: #ffffff;
+    }
+
+    .polaroid.active .caption {
+      opacity: 1;
+      max-height: 80px;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+
+    .polaroid.active .close-card-btn {
+      opacity: 1;
+      pointer-events: auto;
+      transform: scale(1);
+    }
+
+    .back-to-message-btn {
+      position: absolute;
+      bottom: 25px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #ffb6c1;
+      color: #6b4226;
+      border: none;
+      padding: 10px 22px;
+      border-radius: 25px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      z-index: 400;
+      box-shadow: 0 4px 15px rgba(255, 182, 193, 0.6);
+      transition: transform 0.2s, background-color 0.2s;
+    }
+
+    .back-to-message-btn:active {
+      transform: translateX(-50%) scale(0.95);
+      background: #ff9dad;
+    }
+
+    .floating-heart {
+      position: absolute;
+      pointer-events: none;
+      z-index: 350;
+      font-size: 26px;
+      animation: floatUp 2.2s ease-out forwards;
+      filter: drop-shadow(0 2px 6px rgba(255, 182, 193, 0.6));
+    }
+
+    @keyframes floatUp {
+      0% { transform: translateY(0) scale(0.5) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(-380px) scale(1.5) rotate(30deg); opacity: 0; }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <audio id="bgMusic" loop preload="auto">
+    <source src="song.mp3" type="audio/mpeg">
+  </audio>
+
+  <div class="app-viewport" id="viewport">
+    <div class="card-container" id="cardContainer">
+      <img src="กระดาษ3.png" class="layer-3-message" alt="ข้อความ">
+      <canvas id="burnCanvas"></canvas>
+      <img src="กล่อง.png" class="layer-1-box" alt="กล่อง">
+      <canvas id="fxCanvas"></canvas>
+    </div>
+
+    <div class="striker-fixed-container" id="strikerContainer">
+      <div class="matchbox-striker" id="strikerStrip">
+        ถูไม้ขีดตรงนี้เพื่อจุดไฟ🔥
+      </div>
+    </div>
+
+    <div class="matchstick-item" id="draggableMatch">
+      <img id="matchImg" src="ไม้ขีด.png" alt="ไม้ขีด">
+    </div>
+
+    <div class="bouncing-heart-trigger" id="heartTrigger">💗</div>
+
+    <div class="big-heart-modal" id="heartModal">
+      <div class="big-heart-container" id="bigHeartContainer">
+        <div class="big-heart-shape">
+          <div class="heart-water-fill" id="waterFill"></div>
+        </div>
+      </div>
+      <p class="fill-instruction">แตะหรือกดค้างเพื่อเติมความรัก ✨</p>
+    </div>
+
+    <div class="polaroid-overlay" id="polaroidOverlay">
+      <div class="polaroid-container" id="polaroidContainer"></div>
+      <button class="back-to-message-btn" id="backBtn">ย้อนกลับ</button>
+    </div>
+  </div>
+
+  <script>
+    const viewport = document.getElementById('viewport');
+    const canvas = document.getElementById('burnCanvas');
+    const ctx = canvas.getContext('2d');
+    const fxCanvas = document.getElementById('fxCanvas');
+    const fxCtx = fxCanvas.getContext('2d');
+    const bgMusic = document.getElementById('bgMusic');
+
+    const matchEl = document.getElementById('draggableMatch');
+    const matchImg = document.getElementById('matchImg');
+    const strikerStrip = document.getElementById('strikerStrip');
+    const strikerContainer = document.getElementById('strikerContainer');
+    const heartTrigger = document.getElementById('heartTrigger');
+    const backBtn = document.getElementById('backBtn');
+
+    let continuousHeartsInterval = null;
+
+    function playAudioOnFirstInteraction() {
+      if (bgMusic && bgMusic.paused) {
+        bgMusic.play().then(() => {
+          console.log("Music started playing automatically");
+        }).catch((err) => {
+          console.log("Autoplay waiting for interaction:", err);
+        });
+      }
+      window.removeEventListener('touchstart', playAudioOnFirstInteraction);
+      window.removeEventListener('click', playAudioOnFirstInteraction);
+      window.removeEventListener('mousedown', playAudioOnFirstInteraction);
+    }
+
+    window.addEventListener('touchstart', playAudioOnFirstInteraction, { passive: true });
+    window.addEventListener('click', playAudioOnFirstInteraction);
+    window.addEventListener('mousedown', playAudioOnFirstInteraction);
+
+    let isLit = false;
+    let frictionScore = 0;
+    let isDraggingMatch = false;
+    let autoBurning = false;
+    let burnRadius = 0;
+    let maxBurnRadius = 0;
+
+    let dragOffsetX = 0, dragOffsetY = 0;
+    let lastX = 0, lastY = 0;
+
+    let particles = [];
+
+    const noiseAngles = [];
+    const numPoints = 120;
+    for (let i = 0; i < numPoints; i++) {
+      const wave = Math.sin(i * 0.1) * 0.12 + Math.cos(i * 0.2) * 0.08;
+      noiseAngles.push(0.95 + wave);
+    }
+
+    const paperImg = new Image();
+    paperImg.src = 'กระดาษ2.png';
+
+    function resizeCanvas() {
+      const dpr = window.devicePixelRatio || 1;
+      const rect = viewport.getBoundingClientRect();
+
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      canvas.style.width = rect.width + 'px';
+      canvas.style.height = rect.height + 'px';
+
+      fxCanvas.width = rect.width * dpr;
+      fxCanvas.height = rect.height * dpr;
+      fxCanvas.style.width = rect.width + 'px';
+      fxCanvas.style.height = rect.height + 'px';
+
+      ctx.scale(dpr, dpr);
+      fxCtx.scale(dpr, dpr);
+
+      maxBurnRadius = Math.hypot(rect.width / 2, rect.height / 2);
+      drawPaper(rect.width, rect.height);
+    }
+
+    function drawPaper(w, h) {
+      if (paperImg.complete && paperImg.naturalWidth !== 0) {
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.drawImage(paperImg, 0, 0, w, h);
+      }
+    }
+
+    paperImg.onload = () => {
+      resizeCanvas();
+    };
+
+    window.addEventListener('resize', resizeCanvas);
+
+    function createSparks(x, y, count = 3, spread = 8) {
+      for (let i = 0; i < count; i++) {
+        particles.push({
+          x: x,
+          y: y,
+          vx: (Math.random() - 0.5) * spread,
+          vy: (Math.random() - 0.5) * spread - 1.2,
+          size: Math.random() * 3 + 1,
+          color: `hsl(${Math.random() * 20}, 100%, 50%)`,
+          alpha: 1,
+          life: Math.random() * 18 + 10
+        });
+      }
+    }
+
+    function updateParticles() {
+      for (let i = particles.length - 1; i >= 0; i--) {
+        let p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.alpha -= 0.04;
+        p.life--;
+
+        if (p.alpha <= 0 || p.life <= 0) {
+          particles.splice(i, 1);
+        } else {
+          fxCtx.save();
+          fxCtx.globalAlpha = Math.max(0, p.alpha);
+          fxCtx.fillStyle = p.color;
+          fxCtx.beginPath();
+          fxCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+          fxCtx.fill();
+          fxCtx.restore();
+        }
+      }
+    }
+
+    function onStart(e) {
+      if (e.cancelable) e.preventDefault();
+      isDraggingMatch = true;
+      const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+      const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+
+      const rect = matchEl.getBoundingClientRect();
+      dragOffsetX = clientX - rect.left;
+      dragOffsetY = clientY - rect.top;
+
+      lastX = clientX;
+      lastY = clientY;
+    }
+
+    function onMove(e) {
+      if (!isDraggingMatch) return;
+      if (e.cancelable) e.preventDefault();
+
+      const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+      const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+
+      const vpRect = viewport.getBoundingClientRect();
+      const relativeX = clientX - vpRect.left;
+      const relativeY = clientY - vpRect.top;
+
+      const deltaX = Math.abs(clientX - lastX);
+      const deltaY = Math.abs(clientY - lastY);
+      const moveDistance = Math.hypot(deltaX, deltaY);
+
+      lastX = clientX;
+      lastY = clientY;
+
+      matchEl.style.position = 'absolute';
+      matchEl.style.left = (relativeX - dragOffsetX) + 'px';
+      matchEl.style.top = (relativeY - dragOffsetY) + 'px';
+      matchEl.style.right = 'auto';
+      matchEl.style.bottom = 'auto';
+
+      const matchHeadX = relativeX - dragOffsetX + 45;
+      const matchHeadY = relativeY - dragOffsetY + 25;
+
+      if (!isLit) {
+        const strikerRect = strikerStrip.getBoundingClientRect();
+        if (clientX >= strikerRect.left && clientX <= strikerRect.right &&
+            clientY >= strikerRect.top && clientY <= strikerRect.bottom) {
+          
+          if (moveDistance > 2) {
+            frictionScore += moveDistance;
+            createSparks(relativeX, relativeY, 3, 10);
+
+            if (frictionScore > 750) {
+              isLit = true;
+              matchImg.src = 'ไม้ขีดไฟ.png';
+              strikerStrip.innerText = 'จุดติดแล้ว! นำไปจุดตรงกลางกระดาษ';
+              createSparks(relativeX, relativeY, 25, 15);
+            }
+          }
+        }
+      } else {
+        createSparks(matchHeadX, matchHeadY, 2, 4);
+
+        if (!autoBurning) {
+          const screenCenterX = vpRect.width / 2;
+          const screenCenterY = vpRect.height / 2;
+          const distToCenter = Math.hypot(matchHeadX - screenCenterX, matchHeadY - screenCenterY);
+          
+          if (distToCenter < 140) {
+            startAutoBurn(screenCenterX, screenCenterY);
+          }
+        }
+      }
+    }
+
+    function onEnd() { isDraggingMatch = false; }
+
+    matchEl.addEventListener('mousedown', onStart);
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onEnd);
+
+    matchEl.addEventListener('touchstart', onStart, { passive: false });
+    window.addEventListener('touchmove', onMove, { passive: false });
+    window.addEventListener('touchend', onEnd);
+
+    function drawSmoothPath(context, cx, cy, radius, offset = 0) {
+      context.beginPath();
+      for (let i = 0; i < numPoints; i++) {
+        const angle = (i / numPoints) * Math.PI * 2;
+        const r = (radius + offset) * noiseAngles[i];
+        const x = cx + Math.cos(angle) * r;
+        const y = cy + Math.sin(angle) * r;
+        if (i === 0) context.moveTo(x, y);
+        else context.lineTo(x, y);
+      }
+      context.closePath();
+    }
+
+    function startAutoBurn(cx, cy) {
+      autoBurning = true;
+      burnRadius = 10;
+
+      strikerContainer.style.opacity = '0';
+      matchEl.style.display = 'none';
+
+      const rect = viewport.getBoundingClientRect();
+
+      function burnStep() {
+        fxCtx.clearRect(0, 0, rect.width, rect.height);
+
+        if (burnRadius < maxBurnRadius) {
+          burnRadius += 2.8;
+
+          ctx.save();
+          ctx.globalCompositeOperation = 'destination-out';
+          drawSmoothPath(ctx, cx, cy, burnRadius);
+          ctx.fill();
+          ctx.restore();
+
+          fxCtx.save();
+          drawSmoothPath(fxCtx, cx, cy, burnRadius, 25);
+          fxCtx.strokeStyle = 'rgba(60, 30, 10, 0.4)';
+          fxCtx.lineWidth = 22;
+          fxCtx.shadowColor = 'rgba(30, 15, 5, 0.7)';
+          fxCtx.shadowBlur = 12;
+          fxCtx.stroke();
+
+          drawSmoothPath(fxCtx, cx, cy, burnRadius, 8);
+          fxCtx.strokeStyle = 'rgba(15, 8, 3, 0.9)';
+          fxCtx.lineWidth = 12;
+          fxCtx.stroke();
+
+          drawSmoothPath(fxCtx, cx, cy, burnRadius);
+          fxCtx.strokeStyle = 'rgba(255, 90, 0, 0.85)';
+          fxCtx.lineWidth = 5;
+          fxCtx.shadowColor = '#ff3300';
+          fxCtx.shadowBlur = 12;
+          fxCtx.stroke();
+          fxCtx.restore();
+
+          updateParticles();
+          requestAnimationFrame(burnStep);
+        } else {
+          fxCtx.clearRect(0, 0, rect.width, rect.height);
+          ctx.clearRect(0, 0, rect.width, rect.height);
+          strikerContainer.style.display = 'none';
+          heartTrigger.style.display = 'block';
+        }
+      }
+
+      burnStep();
+    }
+
+    function mainFxLoop() {
+      if (!autoBurning) {
+        const rect = viewport.getBoundingClientRect();
+        fxCtx.clearRect(0, 0, rect.width, rect.height);
+        updateParticles();
+      }
+      requestAnimationFrame(mainFxLoop);
+    }
+    mainFxLoop();
+
+    const heartModal = document.getElementById('heartModal');
+    const waterFill = document.getElementById('waterFill');
+    const bigHeartContainer = document.getElementById('bigHeartContainer');
+
+    heartTrigger.addEventListener('click', () => {
+      waterLevel = 0;
+      waterFill.style.height = '0%';
+      heartTrigger.style.display = 'none';
+      heartModal.style.display = 'flex';
+    });
+
+    let waterLevel = 0;
+    let fillInterval = null;
+
+    function addWater() {
+      if (waterLevel < 100) {
+        waterLevel += 4;
+        if (waterLevel > 100) waterLevel = 100;
+        waterFill.style.height = waterLevel + '%';
+        createFloatingHearts(2);
+
+        if (waterLevel >= 100) {
+          stopWatering();
+          setTimeout(() => {
+            heartModal.style.display = 'none';
+            showPolaroidsSimultaneously();
+            spawnMassiveHearts();
+          }, 350);
+        }
+      }
+    }
+
+    function startWatering() {
+      addWater();
+      fillInterval = setInterval(addWater, 60);
+    }
+
+    function stopWatering() {
+      if (fillInterval) clearInterval(fillInterval);
+    }
+
+    bigHeartContainer.addEventListener('mousedown', startWatering);
+    window.addEventListener('mouseup', stopWatering);
+
+    bigHeartContainer.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      startWatering();
+    }, { passive: false });
+    window.addEventListener('touchend', stopWatering);
+
+    const pastelHearts = ['💗', '💜', '🤍', '💖', '✨'];
+
+    function createFloatingHearts(count = 1, customX = null, customY = null) {
+      for (let i = 0; i < count; i++) {
+        const heart = document.createElement('div');
+        heart.className = 'floating-heart';
+        heart.innerText = pastelHearts[Math.floor(Math.random() * pastelHearts.length)];
+        
+        const startX = customX !== null ? (customX + (Math.random() * 60 - 30)) : (Math.random() * (viewport.clientWidth - 40) + 20);
+        const startY = customY !== null ? (customY + (Math.random() * 40 - 20)) : (viewport.clientHeight / 2 + 50);
+        
+        heart.style.left = startX + 'px';
+        heart.style.top = startY + 'px';
+        heart.style.fontSize = (Math.random() * 16 + 22) + 'px';
+
+        viewport.appendChild(heart);
+
+        setTimeout(() => { heart.remove(); }, 2200);
+      }
+    }
+
+    function spawnMassiveHearts() {
+      let counter = 0;
+      const interval = setInterval(() => {
+        createFloatingHearts(5);
+        counter++;
+        if (counter > 12) clearInterval(interval);
+      }, 120);
+    }
+
+    const polaroidData = [
+      { img: 'photo1.jpg', text: 'รูปเเรกที่เค้าเอาอะอ้วน<br>ตั้งโปรไฟล์น่ารักกก', top: '12%', left: '12%', rotate: '-7deg', duration: '1.8s', delay: '0s' },
+      { img: 'photo2.jpg', text: 'รูปเเรกที่ได้ถ่ายอะอ้วน<br>ตอนหลับหน้าเอ็นดูมากก', top: '12%', left: '55%', rotate: '6deg', duration: '2.4s', delay: '0.4s' },
+      { img: 'photo3.jpg', text: 'รูปที่เค้าชอบที่สุด<br>ไม่ใช่ตอนอะอ้วนสวย<br>เเต่คือตอนอะอ้วนยิ้มกว่างสุด', top: '36%', left: '33%', rotate: '-2deg', duration: '1.6s', delay: '0.2s' },
+      { img: 'photo4.jpg', text: 'ครั้งเเรกที่เค้ากับอะอ้วน<br>ได้จับมือกันครั้งเเรก', top: '58%', left: '14%', rotate: '5deg', duration: '2.2s', delay: '0.6s' },
+      { img: 'photo5.jpg', text: 'ครั้งเเรกที่ได้เดินไปซื้อของ<br>มาทํากับข้าวกับอะอ้วนครั้งเเรกก', top: '58%', left: '55%', rotate: '-5deg', duration: '2.0s', delay: '0.3s' }
+    ];
+
+    function showPolaroidsSimultaneously() {
+      const overlay = document.getElementById('polaroidOverlay');
+      const container = document.getElementById('polaroidContainer');
+      container.innerHTML = '';
+      overlay.style.display = 'flex';
+
+      polaroidData.forEach((item, index) => {
+        const card = document.createElement('div');
+        card.className = 'polaroid';
+        card.style.top = item.top;
+        card.style.left = item.left;
+        card.style.setProperty('--target-rotate', item.rotate);
+        card.style.setProperty('--anim-duration', item.duration);
+        card.style.setProperty('--anim-delay', item.delay);
+        card.style.zIndex = index + 1;
+
+        card.innerHTML = `
+          <div class="close-card-btn">✕</div>
+          <img src="${item.img}" alt="photo">
+          <div class="caption">${item.text}</div>
+        `;
+
+        card.classList.add('animate-burst');
+
+        setTimeout(() => {
+          card.classList.remove('animate-burst');
+          card.style.opacity = '1';
+          card.classList.add('idle-bounce');
+        }, 750);
+
+        card.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const isActive = card.classList.contains('active');
+          document.querySelectorAll('.polaroid').forEach(p => p.classList.remove('active'));
+          
+          if (!isActive) {
+            card.classList.add('active');
+            const rect = card.getBoundingClientRect();
+            createFloatingHearts(6, rect.left + rect.width / 2, rect.top + rect.height / 2);
+          }
+        });
+
+        const closeBtn = card.querySelector('.close-card-btn');
+        closeBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          card.classList.remove('active');
+        });
+
+        container.appendChild(card);
+      });
+
+      if (continuousHeartsInterval) clearInterval(continuousHeartsInterval);
+      continuousHeartsInterval = setInterval(() => {
+        if (overlay.style.display === 'flex') {
+          createFloatingHearts(1);
+        }
+      }, 400);
+    }
+
+    document.getElementById('polaroidOverlay').addEventListener('click', () => {
+      document.querySelectorAll('.polaroid').forEach(p => p.classList.remove('active'));
+    });
+
+    backBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      document.getElementById('polaroidOverlay').style.display = 'none';
+      heartTrigger.style.display = 'block';
+      if (continuousHeartsInterval) {
+        clearInterval(continuousHeartsInterval);
+        continuousHeartsInterval = null;
+      }
+    });
+  </script>
+</body>
+</html>
